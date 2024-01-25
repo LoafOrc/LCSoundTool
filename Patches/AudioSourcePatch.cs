@@ -213,21 +213,20 @@ namespace LCSoundTool.Patches
             {
                 string[] keys = SoundTool.replacedClips.Keys.ToArray();
 
-                if (keys.Length > 0)
+                //if (keys.Length > 0) / im fairly certain this isn't needed because if it is 0 the loop won't do any iterations - @loaforc
+                //{
+                for (int i = 0; i < keys.Length; i++)
                 {
-                    for (int i = 0; i < keys.Length; i++)
-                    {
-                        string[] splitName = keys[i].Split("#");
+                    string[] splitName = keys[i].Split("#");
 
-                        if (splitName.Length == 2)
-                        {
-                            if (splitName[1].Contains(instance.gameObject.name))
-                            {
-                                finalName = $"{clipName}#{splitName[1]}";
-                            }
-                        }
-                    }
+                    // early continues to reduce indentation - @loaforc
+                    if (splitName.Length != 2) continue;
+                    if (!splitName[1].Contains(instance.gameObject.name)) continue;
+
+                    finalName = $"{clipName}#{splitName[1]}";
+                    // fairly certain that a break could be placed here if finalname is only supposed to be one value - @loaforc
                 }
+                //}
             }
 
             // Check if clipName exists in the dictionary
@@ -254,10 +253,10 @@ namespace LCSoundTool.Patches
                         {
                             for (int i = 0; i < sources.Length; i++)
                             {
-                                if (sources[i] == instance.gameObject.name)
-                                {
-                                    replaceClip = true;
-                                }
+                                if (sources[i] != instance.gameObject.name) continue;
+
+                                replaceClip = true;
+                                break; // we are already replacing the clip, no need to continue looping through sources - @loaforc
                             }
                         }
                         else
@@ -266,6 +265,10 @@ namespace LCSoundTool.Patches
                             {
                                 replaceClip = true;
                             }
+                            // @loaforc
+                            // im going to keep above the same, but it could be replaced with
+                            // replaceClip = sources[0] == instance.gameObject.name;
+                            // for a cleaner implementation
                         }
                     }
                 }
@@ -340,13 +343,11 @@ namespace LCSoundTool.Patches
                         {
                             string[] splitName = keys[i].Split("#");
 
-                            if (splitName.Length == 2)
-                            {
-                                if (splitName[1].Contains(source.gameObject.name))
-                                {
-                                    finalName = $"{clipName}#{splitName[1]}";
-                                }
-                            }
+                            // again just some continues - @loaforc
+                            if (splitName.Length != 2) continue;
+                            if (!splitName[1].Contains(source.gameObject.name)) continue;
+
+                            finalName = $"{clipName}#{splitName[1]}";
                         }
                     }
                 }
