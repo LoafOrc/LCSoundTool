@@ -217,12 +217,13 @@ namespace LCSoundTool.Patches
                 return original;
 
             string clipName = original.GetName();
-            string finalName = GetFinalName(clipName, source.gameObject.name)
+            string finalName = GetFinalName(clipName, source.gameObject.name);
 
             return GetReplacementClip(finalName, source, original);
         }
 
         private static string GetFinalName(string clipName, string sourceName) {
+            SoundTool.Instance.logger.LogDebug($"getting finalName for: {clipName}");
             string finalName = clipName;
             if (SoundTool.replacedClips.Keys.Count > 0) {
                 string[] keys = SoundTool.replacedClips.Keys.ToArray();
@@ -237,6 +238,7 @@ namespace LCSoundTool.Patches
                     finalName = $"{clipName}#{splitName[1]}";
                 }
             }
+            SoundTool.Instance.logger.LogDebug($"finalName: {finalName}");
             return finalName;
         }
 
@@ -245,6 +247,7 @@ namespace LCSoundTool.Patches
             if(defaultClip == null) {
                 defaultClip = source.clip;
             }
+            SoundTool.Instance.logger.LogDebug($"getting replacement clip for {sourceName}");
 
             // Check if clipName exists in the dictionary
             if (SoundTool.replacedClips.ContainsKey(finalName)) {
@@ -280,6 +283,7 @@ namespace LCSoundTool.Patches
                         }
                     }
                 }
+                SoundTool.Instance.logger.LogDebug($"replacingClip?: {replaceClip}");
 
                 List<RandomAudioClip> randomAudioClip = SoundTool.replacedClips[finalName].clips;
 
@@ -297,10 +301,12 @@ namespace LCSoundTool.Patches
                     if (randomValue <= rc.chance) {
                         // Return the chosen audio clip if allowed, otherwise revert it to vanilla and return the vanilla sound instead.
                         if (replaceClip) {
+                            SoundTool.Instance.logger.LogDebug($"randomly selected {rc.clip.name} to replace {finalName}");
                             return rc.clip;
                         } else {
                             if (originalClips.ContainsKey(sourceName)) {
                                 AudioClip clip = originalClips[sourceName];
+                                SoundTool.Instance.logger.LogDebug($"randomly selected {clip.name} to replace {finalName}, removing from original clips");
                                 originalClips.Remove(sourceName);
                                 return clip;
                             }
@@ -315,9 +321,11 @@ namespace LCSoundTool.Patches
             // If clipName doesn't exist in the dictionary, check if it exists in the original clips if so use that and remove it
             else if (originalClips.ContainsKey(sourceName)) {
                 AudioClip clip = originalClips[sourceName];
+                SoundTool.Instance.logger.LogDebug($"selected {clip.name} from originalClips to replace {finalName}, removing from original clips, replacedClips didn't contain {finalName}");
                 originalClips.Remove(sourceName);
                 return clip;
             }
+            SoundTool.Instance.logger.LogDebug($"returning defaultClip");
             return defaultClip;
         }
         #endregion
